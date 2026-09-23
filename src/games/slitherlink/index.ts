@@ -21,6 +21,7 @@ export class SlitherlinkGame implements GamePlugin {
   private startedAt = 0;
   private timerInterval: number | null = null;
   private isWon = false;
+  private puzzleIndex = -1;
 
   public setDifficulty(level: string): void {
     this.currentDifficulty = level;
@@ -46,7 +47,11 @@ export class SlitherlinkGame implements GamePlugin {
   private startNewGame(): void {
     this.stopTimer();
     const config = SlitherlinkEngine.CONFIGS[this.currentDifficulty] || SlitherlinkEngine.CONFIGS.Beginner;
-    this.puzzle = SlitherlinkEngine.createPuzzle(config);
+    const puzzleCount = SlitherlinkEngine.getPuzzleCount(config);
+    let nextIndex = Math.floor(Math.random() * puzzleCount);
+    if (puzzleCount > 1 && nextIndex === this.puzzleIndex) nextIndex = (nextIndex + 1) % puzzleCount;
+    this.puzzleIndex = nextIndex;
+    this.puzzle = SlitherlinkEngine.createPuzzle(config, this.puzzleIndex);
     this.states = new Map<string, EdgeState>();
     this.startedAt = Date.now();
     this.isWon = false;
@@ -76,6 +81,7 @@ export class SlitherlinkGame implements GamePlugin {
     this.container.innerHTML = `
       <div class="slitherlink-container">
         <div class="slitherlink-hud">
+          <span>Puzzle: <strong>${this.puzzleIndex + 1}/${SlitherlinkEngine.getPuzzleCount({ rows, cols })}</strong></span>
           <span>Lines: <strong id="slitherlink-lines">0</strong></span>
           <span id="slitherlink-status">Build one loop</span>
           <span>Time: <strong id="slitherlink-time">0:00</strong></span>

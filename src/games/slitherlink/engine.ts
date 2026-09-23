@@ -21,20 +21,40 @@ export class SlitherlinkEngine {
     return `${orientation}:${row}:${col}`;
   }
 
-  public static createPuzzle(config: SlitherlinkConfig): SlitherlinkPuzzle {
-    const solution = new Set<string>();
-    const top = 1;
-    const left = 1;
-    const bottom = config.rows - 1;
-    const right = config.cols - 1;
+  public static getPuzzleCount(_config: SlitherlinkConfig): number {
+    return 6;
+  }
 
-    for (let col = left; col < right; col++) {
-      solution.add(this.edgeKey('h', top, col));
-      solution.add(this.edgeKey('h', bottom, col));
-    }
-    for (let row = top; row < bottom; row++) {
-      solution.add(this.edgeKey('v', row, left));
-      solution.add(this.edgeKey('v', row, right));
+  public static createPuzzle(config: SlitherlinkConfig, variant = 0): SlitherlinkPuzzle {
+    const solution = new Set<string>();
+    const lastRow = config.rows;
+    const lastCol = config.cols;
+    const midRow = Math.floor(config.rows / 2);
+    const midCol = Math.floor(config.cols / 2);
+    const paths: Array<Array<[number, number]>> = [
+      [[1, 1], [1, lastCol - 1], [lastRow - 1, lastCol - 1], [lastRow - 1, 1]],
+      [[0, 0], [0, lastCol], [lastRow, lastCol], [lastRow, 0]],
+      [[1, 0], [1, lastCol], [lastRow - 1, lastCol], [lastRow - 1, 0]],
+      [[0, 1], [0, lastCol - 1], [1, lastCol - 1], [1, lastCol], [lastRow, lastCol], [lastRow, 0], [1, 0], [1, 1]],
+      [[0, 0], [0, lastCol - 2], [1, lastCol - 2], [1, lastCol], [lastRow - 1, lastCol], [lastRow - 1, 1], [lastRow, 1], [lastRow, 0]],
+      [[1, 1], [1, midCol], [0, midCol], [0, lastCol - 1], [midRow, lastCol - 1], [midRow, lastCol], [lastRow - 1, lastCol], [lastRow - 1, 1], [midRow, 1], [midRow, 0], [0, 0], [0, 1]]
+    ];
+    const path = paths[((variant % paths.length) + paths.length) % paths.length];
+
+    for (let index = 0; index < path.length; index++) {
+      const [startRow, startCol] = path[index];
+      const [endRow, endCol] = path[(index + 1) % path.length];
+      if (startRow === endRow) {
+        const step = startCol < endCol ? 1 : -1;
+        for (let col = startCol; col !== endCol; col += step) {
+          solution.add(this.edgeKey('h', startRow, Math.min(col, col + step)));
+        }
+      } else {
+        const step = startRow < endRow ? 1 : -1;
+        for (let row = startRow; row !== endRow; row += step) {
+          solution.add(this.edgeKey('v', Math.min(row, row + step), startCol));
+        }
+      }
     }
 
     const clues = Array.from({ length: config.rows }, (_, row) =>

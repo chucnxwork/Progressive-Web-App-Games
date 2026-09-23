@@ -21,25 +21,27 @@ export class SlitherlinkEngine {
     return `${orientation}:${row}:${col}`;
   }
 
-  public static getPuzzleCount(_config: SlitherlinkConfig): number {
-    return 6;
-  }
-
-  public static createPuzzle(config: SlitherlinkConfig, variant = 0): SlitherlinkPuzzle {
+  public static createPuzzle(config: SlitherlinkConfig): SlitherlinkPuzzle {
     const solution = new Set<string>();
-    const lastRow = config.rows;
-    const lastCol = config.cols;
-    const midRow = Math.floor(config.rows / 2);
-    const midCol = Math.floor(config.cols / 2);
-    const paths: Array<Array<[number, number]>> = [
-      [[1, 1], [1, lastCol - 1], [lastRow - 1, lastCol - 1], [lastRow - 1, 1]],
-      [[0, 0], [0, lastCol], [lastRow, lastCol], [lastRow, 0]],
-      [[1, 0], [1, lastCol], [lastRow - 1, lastCol], [lastRow - 1, 0]],
-      [[0, 1], [0, lastCol - 1], [1, lastCol - 1], [1, lastCol], [lastRow, lastCol], [lastRow, 0], [1, 0], [1, 1]],
-      [[0, 0], [0, lastCol - 2], [1, lastCol - 2], [1, lastCol], [lastRow - 1, lastCol], [lastRow - 1, 1], [lastRow, 1], [lastRow, 0]],
-      [[1, 1], [1, midCol], [0, midCol], [0, lastCol - 1], [midRow, lastCol - 1], [midRow, lastCol], [lastRow - 1, lastCol], [lastRow - 1, 1], [midRow, 1], [midRow, 0], [0, 0], [0, 1]]
-    ];
-    const path = paths[((variant % paths.length) + paths.length) % paths.length];
+    const top = Math.floor(Math.random() * Math.max(1, Math.floor(config.rows / 3)));
+    const bottom = config.rows - Math.floor(Math.random() * Math.max(1, Math.floor(config.rows / 3)));
+    const left = Math.floor(Math.random() * Math.max(1, Math.floor(config.cols / 3)));
+    const right = config.cols - Math.floor(Math.random() * Math.max(1, Math.floor(config.cols / 3)));
+    const notchDepth = Math.max(1, Math.floor(Math.min(bottom - top, right - left) / 3));
+    const notchLength = Math.max(1, Math.floor((right - left) / 3));
+    const notchOffset = 1 + Math.floor(Math.random() * Math.max(1, right - left - notchLength));
+    const notchSide = Math.floor(Math.random() * 4);
+    let path: Array<[number, number]>;
+
+    if (notchSide === 0) {
+      path = [[top, left], [top, left + notchOffset], [top + notchDepth, left + notchOffset], [top + notchDepth, left + notchOffset + notchLength], [top, left + notchOffset + notchLength], [top, right], [bottom, right], [bottom, left]];
+    } else if (notchSide === 1) {
+      path = [[top, left], [top, right], [bottom, right], [bottom, right - notchOffset], [bottom - notchDepth, right - notchOffset], [bottom - notchDepth, right - notchOffset - notchLength], [bottom, right - notchOffset - notchLength], [bottom, left]];
+    } else if (notchSide === 2) {
+      path = [[top, left], [top, right], [bottom, right], [bottom, left + notchOffset + notchLength], [bottom - notchDepth, left + notchOffset + notchLength], [bottom - notchDepth, left + notchOffset], [bottom, left + notchOffset], [bottom, left]];
+    } else {
+      path = [[top, left + notchOffset], [top, right], [bottom, right], [bottom, left], [top + notchDepth, left], [top + notchDepth, left + notchOffset]];
+    }
 
     for (let index = 0; index < path.length; index++) {
       const [startRow, startCol] = path[index];

@@ -12,6 +12,7 @@ import { SudokuGame } from './games/sudoku';
 import { MinesweeperGame } from './games/minesweeper';
 import { Game2048 } from './games/2048';
 import { SnakeGame } from './games/snake';
+import { SlitherlinkGame } from './games/slitherlink';
 
 class ArcadeApp {
   private headerContainer: HTMLElement;
@@ -45,6 +46,7 @@ class ArcadeApp {
     GameRegistry.register(new MinesweeperGame());
     GameRegistry.register(new Game2048());
     GameRegistry.register(new SnakeGame());
+    GameRegistry.register(new SlitherlinkGame());
 
     // 3. Render Header
     const header = new HeaderComponent(this.headerContainer, {

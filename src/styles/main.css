@@ -1104,6 +1104,417 @@ body::before {
 .slitherlink-edge:hover::after { background: #99f6e4; }
 .slitherlink-help { color: var(--text-muted); font-size: 0.8rem; text-align: center; }
 
+/* ==========================================================================
+   Sliding Puzzle (15-Puzzle) Styles
+   ========================================================================== */
+.slide-puzzle-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.slide-puzzle-hud {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.65rem 1.25rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.slide-hud-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.slide-hud-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.slide-hud-value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: var(--accent-primary);
+}
+
+.slide-controls-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.slide-theme-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.slide-select {
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  color: var(--text-primary);
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.slide-select:focus {
+  border-color: var(--accent-primary);
+}
+
+.slide-action-btns {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.slide-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  color: var(--text-primary);
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.slide-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.slide-btn.is-active {
+  background: var(--accent-primary);
+  color: #ffffff;
+  border-color: var(--accent-primary);
+}
+
+.slide-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.slide-board-wrapper {
+  position: relative;
+  width: min(88vw, 440px);
+  aspect-ratio: 1;
+  border-radius: var(--radius-lg);
+  padding: 8px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 2px solid var(--border-glass);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), 0 0 28px rgba(6, 182, 212, 0.16);
+  user-select: none;
+  touch-action: none;
+}
+
+.slide-board {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: #090d16;
+}
+
+.slide-tile {
+  position: absolute;
+  width: calc(100% / var(--puzzle-size));
+  height: calc(100% / var(--puzzle-size));
+  left: calc(var(--tile-col) * (100% / var(--puzzle-size)));
+  top: calc(var(--tile-row) * (100% / var(--puzzle-size)));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  box-sizing: border-box;
+  transition: left 0.16s cubic-bezier(0.2, 0.9, 0.3, 1),
+              top 0.16s cubic-bezier(0.2, 0.9, 0.3, 1),
+              transform 0.12s,
+              box-shadow 0.16s,
+              border-color 0.16s;
+  cursor: default;
+  overflow: hidden;
+  user-select: none;
+}
+
+.slide-tile.is-movable {
+  cursor: pointer;
+}
+
+.slide-tile.is-movable:hover {
+  filter: brightness(1.18);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.slide-tile:active {
+  transform: scale(0.95);
+}
+
+.slide-tile.is-hint {
+  animation: slide-pulse-hint 1s infinite alternate;
+  border-color: #facc15 !important;
+  box-shadow: 0 0 16px rgba(250, 204, 21, 0.85) !important;
+}
+
+@keyframes slide-pulse-hint {
+  0% { transform: scale(0.97); }
+  100% { transform: scale(1.02); }
+}
+
+.slide-tile-empty {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  pointer-events: none;
+}
+
+.slide-tile-final {
+  animation: slide-won-piece-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slide-won-piece-in {
+  0% { opacity: 0; transform: scale(0.4) rotate(-10deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+.slide-tile-num {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: clamp(1.1rem, calc(24vw / var(--puzzle-size)), 2.1rem);
+  color: #ffffff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
+  pointer-events: none;
+}
+
+/* Badge number overlay on image artwork */
+.slide-tile[style*="background-image"] .slide-tile-num {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  font-size: 0.72rem;
+  line-height: 1;
+  padding: 3px 6px;
+  background: rgba(10, 15, 30, 0.78);
+  backdrop-filter: blur(4px);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+/* Preview Modal Overlay */
+.slide-preview-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  border-radius: var(--radius-lg);
+}
+
+.slide-preview-overlay.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.slide-preview-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  max-width: 320px;
+  width: 90%;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.slide-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.slide-preview-header h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.slide-preview-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.slide-preview-image-wrap {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border-glass);
+}
+
+.slide-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.slide-preview-grid {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  aspect-ratio: 1;
+}
+
+.slide-preview-tile {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.slide-preview-tile.is-empty {
+  background: transparent;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+}
+
+/* Victory Overlay */
+.slide-victory-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.82);
+  backdrop-filter: blur(8px);
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  border-radius: var(--radius-lg);
+}
+
+.slide-victory-overlay.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.slide-victory-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem 1.25rem;
+  text-align: center;
+  max-width: 320px;
+  width: 90%;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.65), 0 0 30px rgba(16, 185, 129, 0.2);
+  animation: slide-pop 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slide-pop {
+  0% { transform: scale(0.85); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.slide-victory-trophy {
+  font-size: 2.8rem;
+  margin-bottom: 0.25rem;
+}
+
+.slide-victory-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #10b981;
+  margin-bottom: 0.4rem;
+}
+
+.slide-victory-stars {
+  font-size: 1.4rem;
+  margin-bottom: 0.6rem;
+  letter-spacing: 0.1em;
+}
+
+.slide-victory-summary {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.slide-footer-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+.slide-dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 48px);
+  grid-template-rows: repeat(3, 44px);
+  gap: 6px;
+  margin-top: 0.25rem;
+}
+
+.slide-guide-text {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  text-align: center;
+  max-width: 440px;
+  line-height: 1.35;
+}
+
 .dpad-btn {
   background: var(--bg-card);
   border: 1px solid var(--border-glass);
